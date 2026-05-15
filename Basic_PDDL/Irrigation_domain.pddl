@@ -2,22 +2,22 @@
 
 (:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions)
 
-(:types robot crop)
+(:types crop depot - location robot)
 
 (:predicates 
-    (at ?r - robot ?c - crop)
+    (at ?r - robot ?l - location)
     (is-priority ?c - crop)
-    (connected ?c1 ?c2 - crop)       
+    (connected ?l1 ?l2 - location)
 )
 
 (:functions
     (moisture_level ?c - crop)
 )
 
-(:action reach
-    :parameters (?r - robot ?c - crop)
-    :precondition (and (is-priority ?c))
-    :effect (and (at ?r ?c))
+(:action move
+    :parameters (?r - robot ?from - location ?to - location)
+    :precondition (and (at ?r ?from) (connected ?from ?to))
+    :effect (and (at ?r ?to) (not (at ?r ?from)))
 )
 
 
