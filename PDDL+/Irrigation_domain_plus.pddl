@@ -55,13 +55,13 @@
 
 (:action start_irrigation
     :parameters (?r - robot ?c - crop)
-    :precondition (and (at ?r ?c) (not (irrigating ?r ?c)))
+    :precondition (and (at ?r ?c) (not (irrigating ?r ?c)) (is-priority ?c) (> (water_supply ?r) 0))
     :effect (and (irrigating ?r ?c))
 )
 
 (:action stop_irrigation
     :parameters (?r - robot ?c - crop)
-    :precondition (and (at ?r ?c) (irrigating ?r ?c))
+    :precondition (and (at ?r ?c) (irrigating ?r ?c) (not (is-priority ?c)) (> (water_supply ?r) 0))
     :effect (and (not (irrigating ?r ?c)))
 )
 
