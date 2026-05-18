@@ -1,6 +1,6 @@
 (define (domain irrigation_domain_plus)
 
-(:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions :durative-actions :time)
+(:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions :time)
 
 (:types crop depot - location robot)
 
@@ -53,25 +53,19 @@
 )
 
 
-(:durative-action irrigation_handling
+(:action start_irrigation
     :parameters (?r - robot ?c - crop)
-    :duration (= ?duration 3)
-    :condition(and
-        (at start (at ?r ?c))
-        (at start (is-priority ?c))
-        (at start (> (water_supply ?r) 0))
-        (at start (not (unusable ?c)))
-        (at start (not(irrigating ?r ?c)))
-        (over all (at ?r ?c))
-        (over all (> (water_supply ?r) 0))
-        (over all (not (unusable ?c)))
-    )
-    :effect (and 
-        (at start (irrigating ?r ?c))
-        (at end (not (irrigating ?r ?c)))
-        (at end (not (is-priority ?c)))
-    )
+    :precondition (and (at ?r ?c) (not (irrigating ?r ?c)))
+    :effect (and (irrigating ?r ?c))
 )
+
+(:action stop_irrigation
+    :parameters (?r - robot ?c - crop)
+    :precondition (and (at ?r ?c) (irrigating ?r ?c))
+    :effect (and (not (irrigating ?r ?c)))
+)
+
+
 
 (:action check_levels
     :parameters (?c - crop)

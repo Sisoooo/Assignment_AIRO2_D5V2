@@ -9,7 +9,7 @@
 
 (:init
 
-    (= (water_supply robot) 100)
+    (= (water_supply robot) 150)
 
     (at robot start1)
     (connected start1 c1)
@@ -39,7 +39,7 @@
 )
 
 (:goal (and
-    (forall (?c - crop) (>= (moisture_level ?c) 50)) (= (water_supply robot) 0)
+    (forall (?c - crop) (>= (moisture_level ?c) 50))
 ))
 
 )
