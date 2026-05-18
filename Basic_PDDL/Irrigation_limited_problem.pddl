@@ -1,6 +1,6 @@
-(define (problem irrigation_problem) 
+(define (problem irrigation_limited_problem) 
 
-(:domain irrigation_domain)
+(:domain irrigation_limited_domain)
 
 (:objects robot1 - robot
           c1 c2 c3 c4 c5 c6 - crop
@@ -9,7 +9,7 @@
 
 (:init
 
-    (= (water_supply robot1) 50)
+    (= (water_supply robot1) 150)
 
     (at robot1 start1)
     (connected start1 c1)
