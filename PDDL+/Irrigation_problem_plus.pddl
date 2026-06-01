@@ -42,4 +42,6 @@
     (forall (?c - crop) (>= (moisture_level ?c) 50))
 ))
 
+(:metric minimize (total-time))
+
 )

@@ -39,6 +39,7 @@
     :parameters (?c - crop)
     :precondition (and
         (< (moisture_level ?c) 10)
+        (not (unusable ?c))
     )
     :effect (and
         (assign (moisture_level ?c) 0)
