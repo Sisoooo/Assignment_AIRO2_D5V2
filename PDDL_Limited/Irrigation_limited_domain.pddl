@@ -1,4 +1,4 @@
-(define (domain irrigation_domain)
+(define (domain irrigation_limited_domain)
 
 (:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions)
 
@@ -25,7 +25,7 @@
 (:action irrigate
     :parameters (?r - robot ?c - crop)
     :precondition (and (at ?r ?c) (is-priority ?c) (> (water_supply ?r) 0))
-    :effect (and (increase (moisture_level ?c) 10) (decrease (water_supply ?r) 10))
+    :effect (and (increase (moisture_level ?c) 10) (decrease (water_supply ?r) 10) (not (is-priority ?c)))
 )
 
 (:action check_levels
