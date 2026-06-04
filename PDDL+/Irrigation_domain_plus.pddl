@@ -30,8 +30,8 @@
     :parameters (?r - robot ?c - crop)
     :precondition (and (irrigating ?r ?c) (at ?r ?c))
     :effect (and
-        (increase (moisture_level ?c) (* 3 #t))
-        (decrease (water_supply ?r) (* 3 #t))
+        (increase (moisture_level ?c) (* 10 #t))
+        (decrease (water_supply ?r) (* 10 #t))
     )
 )
 
