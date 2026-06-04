@@ -9,9 +9,11 @@
 
 (:init
 
-    (= (water_supply robot) 150)
+    (= (water_supply robot) 200)
 
     (at robot start1)
+    (idle robot)
+
     (connected start1 c1)
     (connected c1 start1)
     (connected c1 c2)
