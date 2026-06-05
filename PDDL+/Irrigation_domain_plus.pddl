@@ -28,7 +28,7 @@
 
 (:process irrigating_crop
     :parameters (?r - robot ?c - crop)
-    :precondition (and (irrigating ?r ?c) (at ?r ?c))
+    :precondition (and (irrigating ?r ?c) (at ?r ?c) (> (water_supply ?r) 0))
     :effect (and
         (increase (moisture_level ?c) (* 10 #t))
         (decrease (water_supply ?r) (* 10 #t))
@@ -39,7 +39,7 @@
 (:event drought
     :parameters (?c - crop)
     :precondition (and
-        (= (moisture_level ?c) 10)
+        (<= (moisture_level ?c) 10)
         (not (unusable ?c))
     )
     :effect (and

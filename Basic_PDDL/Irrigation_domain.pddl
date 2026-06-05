@@ -23,8 +23,8 @@
 
 (:action irrigate
     :parameters (?r - robot ?c - crop)
-    :precondition (and (at ?r ?c) (is-priority ?c))
-    :effect (and (increase (moisture_level ?c) 10) (not (is-priority ?c)))
+    :precondition (and (at ?r ?c) (is-priority ?c) (< (moisture_level ?c) 50))
+    :effect (and (increase (moisture_level ?c) 10))
 )
 
 (:action check_levels

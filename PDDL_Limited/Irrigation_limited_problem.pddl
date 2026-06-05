@@ -39,7 +39,7 @@
 )
 
 (:goal (and
-    (forall (?c - crop) (>= (moisture_level ?c) 50)) (= (water_supply robot1) 0)
+    (forall (?c - crop) (>= (moisture_level ?c) 50))
 ))
 
 )
