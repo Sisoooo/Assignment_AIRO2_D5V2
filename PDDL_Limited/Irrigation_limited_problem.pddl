@@ -9,7 +9,8 @@
 
 (:init
 
-    (= (water_supply robot1) 150)
+    (= (water_supply robot1) 80)
+    (= (num_sacrificed) 0)
 
     (at robot1 start1)
     (connected start1 c1)
@@ -39,7 +40,9 @@
 )
 
 (:goal (and
-    (forall (?c - crop) (>= (moisture_level ?c) 50))
+    (forall (?c - crop) (or (>= (moisture_level ?c) 50) (sacrificed ?c)))
 ))
+
+(:metric minimize (num_sacrificed))
 
 )

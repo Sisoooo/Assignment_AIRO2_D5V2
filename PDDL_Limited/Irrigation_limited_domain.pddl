@@ -1,6 +1,6 @@
 (define (domain irrigation_limited_domain)
 
-(:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions)
+(:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions :disjunctive-preconditions)
 
 (:types crop depot - location robot)
 
@@ -8,11 +8,13 @@
     (at ?r - robot ?l - location)
     (is-priority ?c - crop)
     (connected ?l1 ?l2 - location)
+    (sacrificed ?c - crop)
 )
 
 (:functions
     (moisture_level ?c - crop)
     (water_supply ?r - robot)
+    (num_sacrificed)
 )
 
 (:action move
@@ -36,5 +38,11 @@
     :effect (and (is-priority ?c))
 )
 
+
+(:action sacrifice
+    :parameters (?c - crop ?r - robot)
+    :precondition (and (= (water_supply ?r) 0) (not (sacrificed ?c)))
+    :effect (and (sacrificed ?c) (increase (num_sacrificed) 1))
+)
 
 )
