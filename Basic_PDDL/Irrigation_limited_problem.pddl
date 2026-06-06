@@ -1,6 +1,6 @@
 (define (problem irrigation_limited_problem) 
 
-(:domain irrigation_limited_domain)
+(:domain irrigation_basic_domain)
 
 (:objects robot1 - robot
           c1 c2 c3 c4 c5 c6 - crop

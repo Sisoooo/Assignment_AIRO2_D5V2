@@ -16,6 +16,7 @@
 (:functions
     (moisture_level ?c - crop)
     (water_supply ?r - robot)
+    (num_drought_events)
 )
 
 (:process evaporation
@@ -45,6 +46,7 @@
     :effect (and
         (assign (moisture_level ?c) 0)
         (unusable ?c)
+        (increase (num_drought_events) 1)
     )
 )
 

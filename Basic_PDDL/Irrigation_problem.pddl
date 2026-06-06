@@ -1,6 +1,6 @@
 (define (problem irrigation_problem) 
 
-(:domain irrigation_domain)
+(:domain irrigation_basic_domain)
 
 (:objects robot1 - robot
           c1 c2 c3 c4 c5 c6 - crop
@@ -8,6 +8,10 @@
 )
 
 (:init
+
+    (= (water_supply robot1) 500)
+    (= (num_sacrificed) 0)
+
     (at robot1 start1)
     (connected start1 c1)
     (connected c1 start1)
@@ -36,7 +40,9 @@
 )
 
 (:goal (and
-    (forall (?c - crop) (>= (moisture_level ?c) 50))
+    (forall (?c - crop) (or (>= (moisture_level ?c) 50) (sacrificed ?c)))
 ))
+
+(:metric minimize (num_sacrificed))
 
 )
