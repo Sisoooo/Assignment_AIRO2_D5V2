@@ -52,7 +52,7 @@
 
 (:action move
     :parameters (?r - robot ?from - location ?to - location)
-    :precondition (and (at ?r ?from) (connected ?from ?to))
+    :precondition (and (at ?r ?from) (connected ?from ?to) (not (idle ?r)))
     :effect (and (at ?r ?to) (not (at ?r ?from)))
 )
 
