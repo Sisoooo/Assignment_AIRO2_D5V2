@@ -10,6 +10,7 @@
 (:init
 
     (= (water_supply robot) 200)
+    (= (move_progress robot) 0)
 
     (at robot start1)
     (idle robot)

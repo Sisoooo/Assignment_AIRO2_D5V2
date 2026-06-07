@@ -11,12 +11,15 @@
     (irrigating ?r - robot ?c - crop)
     (idle ?r - robot)
     (targeted ?c - crop)
+    (moving ?r - robot)
+    (next_location ?r - robot ?l - location)
 )
 
 (:functions
     (moisture_level ?c - crop)
     (water_supply ?r - robot)
     (num_drought_events)
+    (move_progress ?r - robot)
 )
 
 (:process evaporation
@@ -50,10 +53,37 @@
     )
 )
 
-(:action move
+(:action start_move
     :parameters (?r - robot ?from - location ?to - location)
-    :precondition (and (at ?r ?from) (connected ?from ?to) (not (idle ?r)))
-    :effect (and (at ?r ?to) (not (at ?r ?from)))
+    :precondition (and (at ?r ?from) (connected ?from ?to) (not (idle ?r)) (not (moving ?r)))
+    :effect (and
+        (not (at ?r ?from))
+        (moving ?r)
+        (next_location ?r ?to)
+        (assign (move_progress ?r) 0)
+    )
+)
+
+(:process moving
+    :parameters (?r - robot)
+    :precondition (and (moving ?r))
+    :effect (and
+        (increase (move_progress ?r) (* 1 #t))
+    )
+)
+
+(:event arrive
+    :parameters (?r - robot ?to - location)
+    :precondition (and
+        (moving ?r)
+        (next_location ?r ?to)
+        (>= (move_progress ?r) 1)
+    )
+    :effect (and
+        (not (moving ?r))
+        (at ?r ?to)
+        (not (next_location ?r ?to))
+    )
 )
 
 (:action choose_target
