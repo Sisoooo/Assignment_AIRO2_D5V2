@@ -18,7 +18,6 @@
 (:functions
     (moisture_level ?c - crop)
     (water_supply ?r - robot)
-    (num_drought_events)
     (move_progress ?r - robot)
 )
 
@@ -43,13 +42,12 @@
 (:event drought
     :parameters (?c - crop)
     :precondition (and
-        (<= (moisture_level ?c) 10)
+        (<= (moisture_level ?c) 5)
         (not (unusable ?c))
     )
     :effect (and
         (assign (moisture_level ?c) 0)
         (unusable ?c)
-        (increase (num_drought_events) 1)
     )
 )
 
