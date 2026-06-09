@@ -1,6 +1,6 @@
 (define (domain irrigation_domain_plus)
 
-(:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions :time)
+(:requirements :strips :typing :fluents :negative-preconditions :universal-preconditions :time :disjunctive-preconditions)
 
 (:types crop depot - location robot)
 
@@ -19,11 +19,12 @@
     (moisture_level ?c - crop)
     (water_supply ?r - robot)
     (move_progress ?r - robot)
+    (num_drought_events)
 )
 
 (:process evaporation
     :parameters (?c - crop)
-    :precondition (and (>= (moisture_level ?c) 10))
+    :precondition (and (>= (moisture_level ?c) 10) (not (unusable ?c)))
     :effect (and
         (decrease (moisture_level ?c) (* 1 #t))
     )
@@ -42,12 +43,13 @@
 (:event drought
     :parameters (?c - crop)
     :precondition (and
-        (<= (moisture_level ?c) 5)
+        (<= (moisture_level ?c) 10)
         (not (unusable ?c))
     )
     :effect (and
         (assign (moisture_level ?c) 0)
         (unusable ?c)
+        (increase (num_drought_events) 1)
     )
 )
 
@@ -86,7 +88,7 @@
 
 (:action choose_target
     :parameters (?r - robot ?c - crop)
-    :precondition (and (idle ?r) (< (moisture_level ?c) 50) (not (unusable ?c)))
+    :precondition (and (idle ?r) (forall (?other - crop) (<= (moisture_level ?c) (moisture_level ?other))) (not (unusable ?c)) (> (moisture_level ?c) 10))
     :effect (and (not (idle ?r)) (targeted ?c))
 )
 

@@ -11,6 +11,7 @@
 
     (= (water_supply robot) 200)
     (= (move_progress robot) 0)
+    (= (num_drought_events) 0)
 
     (at robot start1)
     (idle robot)
@@ -42,9 +43,9 @@
 )
 
 (:goal (and
-    (forall (?c - crop) (>= (moisture_level ?c) 50))
+    (forall (?c - crop) (or (>= (moisture_level ?c) 50) (unusable ?c)))
 ))
 
-(:metric minimize (total-time))
+(:metric minimize (+ (total-time) (* 1000 (num_drought_events))))
 
 )
