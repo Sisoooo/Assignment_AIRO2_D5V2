@@ -24,9 +24,7 @@ The defined types are *robot* and *location*, which is divided in crop and depot
 
 The predicates (connected ?l1 ?l2 - location) and (at ?r - robot ?l - location) are respectively used to define near crops and the robot's current location, forging a basic localization environment. Here below is a basic sketch of the environment:
 
-The *connected* predicate only defines the connections between the field's sublocations, and stacking them as done in the problem file allows to form a precise and confined environment where the robot can move.  
-Another peculiar predicate, (is-priority ?c -crop), is used to model a priority logic that lets the robot choose which crop to irrigate first based on how bad its moisture condition is. This logic is directly tied to the function (moisture_level ?c - crop), which assigns a number for the moisture level of every crop. This allows to both model moisture levels explicitly, as requested by modelling guidelines, and discretely, since it is done with a number association. In the problem file, this function will be repeated for every defined crop. 
-
+The *connected* predicate only defines the connections between the field's sublocations, and stacking them as done in the problem file allows to form a precise and confined environment where the robot can move. The environment used in this scenario and all the following is shown below:
 
     ---------
     | start1 |
@@ -41,7 +39,149 @@ Another peculiar predicate, (is-priority ?c -crop), is used to model a priority 
     --------- --------- ---------
 
 
+Another peculiar predicate, (is-priority ?c -crop), is used to model a priority logic that lets the robot choose which crop to irrigate first based on how bad its moisture condition is. This logic is directly tied to the function (moisture_level ?c - crop), which assigns a number for the moisture level of every crop. This allows to both model moisture levels explicitly, as requested by modelling guidelines, and discretely, since it is done with a number association. In the problem file, this function will be repeated for every defined crop. 
+
+The actions defined in the domain implement the robot's behavioural logic. The first is the movement action:
+
+```
+(:action move
+    :parameters (?r - robot ?from - location ?to - location)
+    :precondition (and (at ?r ?from) (connected ?from ?to))
+    :effect (and (at ?r ?to) (not (at ?r ?from)))
+)
+```
+
+In discrete PDDL, `move` is instantaneous and represents a single adjacency hop. The `connected` predicate encodes the field topology shown above, so multi-hop paths are handled by chaining multiple `move` steps.
+
+The priority selection is handled by `check_levels`:
+
+```
+(:action check_levels
+    :parameters (?c - crop)
+    :precondition (and
+        (forall (?other - crop) (>= (moisture_level ?other) (moisture_level ?c)))
+    )
+    :effect (and
+        (is-priority ?c)
+        (forall (?other - crop)
+            (when (not (= ?other ?c)) (not (is-priority ?other)))
+        )
+    )
+)
+```
+
+`check_levels` sets the `is-priority` flag on the crop with the globally lowest moisture level. The universal quantifier in both precondition and effect guarantees that at most one crop is flagged as priority at any time, enforcing the greedy moisture-critical-first strategy required by the modelling guidelines.
+
+Once the priority crop is identified, the robot irrigates it through repeated applications of:
+
+```
+(:action irrigate
+    :parameters (?r - robot ?c - crop)
+    :precondition (and (at ?r ?c) (is-priority ?c) (>= (water_supply ?r) 10) (< (moisture_level ?c) 50))
+    :effect (and (increase (moisture_level ?c) 10) (decrease (water_supply ?r) 10))
+)
+```
+
+`irrigate` applies a discrete 10-unit water increment to the targeted crop while consuming the same amount from the robot's supply. The action can only fire while the crop is below the 50-unit threshold and the robot still holds water, modelling irrigation as a non-binary, iteratively-applied operation in compliance with the modelling guidelines. A fourth action, `sacrifice`, handles the water-exhausted fallback case and is discussed in the next section.
+
 # Basic PDDL - Differences between abundant and limited scenarios
+
+Both problems share the same domain file and the same six-crop field layout with identical initial moisture values: c1=17, c2=63, c3=42, c4=88, c5=5, c6=71. Three crops start below the 50-unit acceptability threshold and require irrigation: c5 (5), c1 (17) and c3 (42). The minimum water expenditure to bring all three to threshold is 50+40+10 = 100 units.
+
+In the abundant scenario (`Irrigation_problem.pddl`) the robot is given a water supply of 500 units, far exceeding the 100 required. The planner therefore ignores the `sacrifice` action entirely and produces a zero-sacrifice solution, following the priority order c5 → c1 → c3 dictated by `check_levels`. The metric `(minimize (num_sacrificed))` evaluates to 0 and the water constraint plays no role in the decisions taken.
+
+In the limited scenario (`Irrigation_limited_problem.pddl`) the water supply is reduced to 80 units — 20 fewer than the minimum required. The fourth action in the domain, `sacrifice`, becomes relevant here:
+
+```
+(:action sacrifice
+    :parameters (?c - crop ?r - robot)
+    :precondition (and (at ?r ?c) (= (water_supply ?r) 0) (not (sacrificed ?c)))
+    :effect (and (sacrificed ?c) (increase (num_sacrificed) 1))
+)
+```
+
+`sacrifice` marks a crop as permanently lost when the robot's supply is fully exhausted, allowing the goal `(forall (?c - crop) (or (>= (moisture_level ?c) 50) (sacrificed ?c)))` to still be satisfied. Together with the metric `(minimize (num_sacrificed))`, this gives the planner an explicit cost for abandoning a crop and drives it to find the allocation that wastes the least.
+
+The plans returned by the planner for both scenarios are shown below.
+
+**Abundant scenario plan:**
+
+```
+0.0: (check_levels c5)
+1.0: (move robot1 start1 c1)
+2.0: (move robot1 c1 c2)
+3.0: (move robot1 c2 c5)
+4.0: (irrigate robot1 c5)
+5.0: (irrigate robot1 c5)
+6.0: (move robot1 c5 c4)
+7.0: (move robot1 c4 c1)
+8.0: (check_levels c1)
+9.0: (irrigate robot1 c1)
+10.0: (move robot1 c1 c2)
+11.0: (move robot1 c2 c3)
+12.0: (move robot1 c3 c6)
+13.0: (check_levels c5)
+14.0: (move robot1 c6 c5)
+15.0: (irrigate robot1 c5)
+16.0: (move robot1 c5 c6)
+17.0: (move robot1 c6 c3)
+18.0: (check_levels c1)
+19.0: (move robot1 c3 c2)
+20.0: (move robot1 c2 c1)
+21.0: (irrigate robot1 c1)
+22.0: (move robot1 c1 c2)
+23.0: (move robot1 c2 c3)
+24.0: (move robot1 c3 c6)
+25.0: (check_levels c5)
+26.0: (move robot1 c6 c5)
+27.0: (irrigate robot1 c5)
+28.0: (move robot1 c5 c4)
+29.0: (move robot1 c4 c1)
+30.0: (check_levels c1)
+31.0: (irrigate robot1 c1)
+32.0: (check_levels c3)
+33.0: (move robot1 c1 c2)
+34.0: (move robot1 c2 c3)
+35.0: (irrigate robot1 c3)
+36.0: (move robot1 c3 c2)
+37.0: (move robot1 c2 c1)
+38.0: (move robot1 c1 c4)
+39.0: (check_levels c5)
+40.0: (move robot1 c4 c5)
+41.0: (irrigate robot1 c5)
+42.0: (move robot1 c5 c4)
+43.0: (move robot1 c4 c1)
+44.0: (check_levels c1)
+45.0: (irrigate robot1 c1)
+```
+
+The plan completes in 45 steps with `num_sacrificed = 0`, consuming exactly 100 units of water (10 irrigations × 10 units). A notable aspect is that the robot does not fully irrigate one crop before moving to the next: instead, it interleaves partial irrigations across c5 and c1 in a back-and-forth pattern. This is a direct consequence of `check_levels` being re-evaluated after each irrigation step. After two irrigations, c5 reaches moisture 25; since c1 (17) is now lower, `check_levels c1` fires, making c1 the new priority. After one irrigation c1 reaches 27, which is above c5 (25), so priority shifts back to c5. This reactive switching continues until all three below-threshold crops (c5, c1, c3) reach ≥ 50. The abundant water supply means the back-and-forth movement overhead carries no cost in terms of the metric, so the planner accepts it as a valid solution.
+
+**Limited scenario plan:**
+
+```
+0.0: (check_levels c5)
+1.0: (move robot1 start1 c1)
+2.0: (move robot1 c1 c2)
+3.0: (move robot1 c2 c5)
+4.0: (irrigate robot1 c5)
+5.0: (irrigate robot1 c5)
+6.0: (irrigate robot1 c5)
+7.0: (irrigate robot1 c5)
+8.0: (irrigate robot1 c5)
+9.0: (move robot1 c5 c4)
+10.0: (move robot1 c4 c1)
+11.0: (check_levels c1)
+12.0: (irrigate robot1 c1)
+13.0: (irrigate robot1 c1)
+14.0: (irrigate robot1 c1)
+15.0: (sacrifice c1 robot1)
+16.0: (move robot1 c1 c2)
+17.0: (move robot1 c2 c3)
+18.0: (sacrifice c3 robot1)
+```
+
+The plan terminates in 18 steps with `num_sacrificed = 2`. The robot first fully irrigates c5 (5 applications × 10 = 50 units; c5: 5 → 55), then moves to c1 and partially irrigates it (3 × 10 = 30 units; c1: 17 → 47), exhausting the 80-unit supply. With water depleted, c1 cannot reach the threshold and is sacrificed at step 15. The robot then travels to c3 — which has never been irrigated (moisture still 42) — and sacrifices it as well. The root cause is structural: the universal precondition of `check_levels` forbids the robot from targeting c1 until c5's moisture level is at least equal to c1's (17), meaning c5 must receive at minimum 2 irrigations (5 → 25) before the priority can ever shift. Combined with c5's large deficit (45 units needed to reach threshold), 50 of the 80 available units are necessarily spent on c5 alone, leaving only 30 for the remaining crops. Since c1 requires 40 units and c3 requires 10, the budget falls exactly 20 units short of a zero-sacrifice solution, and both remaining below-threshold crops are lost. This directly demonstrates how water constraints influence planning decisions: the resource limit, amplified by the hard priority ordering enforced by `check_levels`, forces the planner to sacrifice two crops despite their combined deficit being smaller than c5's alone.
 
 
 # PDDL+ - Domain functions 
@@ -184,3 +324,4 @@ This plan also highlights some trade-offs between water allocation and crop heal
 - step-by-step movement defines a safe strategy, but adds up evaporation to all the crops by being a one-crop-at-a-time movement, since every step consumes 1 unit of moisture level for each crop without any water being dispensed;
 
 - as a consequence, the water supply also becomes a hard constraint which could cause drought events in harder scenarios if not handled accordingly, i.e. using a more capient water supply or using a multi-robot collaborative system.
+
