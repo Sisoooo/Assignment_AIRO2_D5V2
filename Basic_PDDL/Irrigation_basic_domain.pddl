@@ -27,7 +27,7 @@
 
 (:action irrigate
     :parameters (?r - robot ?c - crop)
-    :precondition (and (at ?r ?c) (is-priority ?c) (>= (water_supply ?r) 10) (< (moisture_level ?c) 50))
+    :precondition (and (at ?r ?c) (is-priority ?c) (> (water_supply ?r) 0) (< (moisture_level ?c) 50))
     :effect (and (increase (moisture_level ?c) 10) (decrease (water_supply ?r) 10))
 )
 
