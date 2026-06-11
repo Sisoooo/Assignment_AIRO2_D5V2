@@ -11,6 +11,7 @@
 
     (= (water_supply robot1) 500)
     (= (num_sacrificed) 0)
+    (needs_check)
 
     (at robot1 start1)
     (connected start1 c1)

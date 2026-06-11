@@ -10,6 +10,8 @@
     (is-priority ?c - crop)
     (connected ?l1 ?l2 - location)
     (sacrificed ?c - crop)
+    (needs_check)
+
 )
 
 (:functions
@@ -20,7 +22,7 @@
 
 (:action move
     :parameters (?r - robot ?from - location ?to - location)
-    :precondition (and (at ?r ?from) (connected ?from ?to))
+    :precondition (and (at ?r ?from) (connected ?from ?to) (not (needs_check)))
     :effect (and (at ?r ?to) (not (at ?r ?from)))
 )
 
@@ -28,16 +30,18 @@
 (:action irrigate
     :parameters (?r - robot ?c - crop)
     :precondition (and (at ?r ?c) (is-priority ?c) (> (water_supply ?r) 0) (< (moisture_level ?c) 50))
-    :effect (and (increase (moisture_level ?c) 10) (decrease (water_supply ?r) 10))
+    :effect (and (increase (moisture_level ?c) 10) (decrease (water_supply ?r) 10) (needs_check))
 )
 
 (:action check_levels
-    :parameters (?c - crop)
+    :parameters (?c - crop ?r - robot)
     :precondition (and
+        (> (water_supply ?r) 0)
         (forall (?other - crop) (>= (moisture_level ?other) (moisture_level ?c)))
     )
     :effect (and
         (is-priority ?c)
+        (not (needs_check))
         (forall (?other - crop)
             (when (not (= ?other ?c)) (not (is-priority ?other)))
         )
@@ -47,7 +51,7 @@
 
 (:action sacrifice
     :parameters (?c - crop ?r - robot)
-    :precondition (and (at ?r ?c) (= (water_supply ?r) 0) (not (sacrificed ?c)))
+    :precondition (and (= (water_supply ?r) 0) (not (sacrificed ?c)))
     :effect (and (sacrificed ?c) (increase (num_sacrificed) 1))
 )
 
