@@ -43,7 +43,7 @@
 (:event drought
     :parameters (?c - crop)
     :precondition (and
-        (<= (moisture_level ?c) 10)
+        (< (moisture_level ?c) 10)
         (not (unusable ?c))
     )
     :effect (and
