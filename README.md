@@ -95,7 +95,7 @@ Extends the model with **continuous processes** and **instantaneous events** to 
 [ENHSP](https://sites.google.com/view/enhsp/) supports PDDL+ with numeric fluents, processes, and events.
 
 ```bash
-java -jar enhsp.jar -o Irrigation_domain_plus.pddl -f Irrigation_problem_plus.pddl
+java -jar enhsp.jar -o Irrigation_domain_plus.pddl -f Irrigation_problem_plus.pddl -h aibr
 ```
 
 ---

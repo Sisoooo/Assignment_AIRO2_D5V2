@@ -44,6 +44,7 @@
 
 (:goal (and
     (forall (?c - crop) (or (> (moisture_level ?c) 50) (unusable ?c)))
+    (idle robot)
 ))
 
 (:metric minimize (+ (total-time) (* 1000 (num_drought_events))))
