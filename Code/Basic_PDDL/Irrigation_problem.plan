@@ -1,0 +1,32 @@
+;;!domain: irrigation_basic_domain
+;;!problem: irrigation_problem
+
+0.00000: (check_levels c5 robot1)
+1.00000: (move robot1 start1 c1)
+2.00000: (move robot1 c1 c4)
+3.00000: (move robot1 c4 c5)
+4.00000: (irrigate robot1 c5)
+5.00000: (irrigate robot1 c5)
+6.00000: (check_levels c1 robot1)
+7.00000: (move robot1 c5 c2)
+8.00000: (move robot1 c2 c1)
+9.00000: (irrigate robot1 c1)
+10.00000: (irrigate robot1 c1)
+11.00000: (irrigate robot1 c1)
+12.00000: (irrigate robot1 c1)
+13.00000: (check_levels c5 robot1)
+14.00000: (move robot1 c1 c2)
+15.00000: (move robot1 c2 c5)
+16.00000: (irrigate robot1 c5)
+17.00000: (irrigate robot1 c5)
+18.00000: (check_levels c3 robot1)
+19.00000: (move robot1 c5 c2)
+20.00000: (move robot1 c2 c3)
+21.00000: (irrigate robot1 c3)
+22.00000: (check_levels c5 robot1)
+23.00000: (move robot1 c3 c2)
+24.00000: (move robot1 c2 c5)
+25.00000: (irrigate robot1 c5)
+
+; Makespan: 25
+; Metric: 25

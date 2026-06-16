@@ -102,7 +102,7 @@
 
 (:action stop_irrigation
     :parameters (?r - robot ?c - crop)
-    :precondition (and (at ?r ?c) (irrigating ?r ?c) (>= (moisture_level ?c) 50))
+    :precondition (and (at ?r ?c) (irrigating ?r ?c) (> (moisture_level ?c) 50))
     :effect (and (not (irrigating ?r ?c)) (idle ?r) (not (targeted ?c)))
 )
 
