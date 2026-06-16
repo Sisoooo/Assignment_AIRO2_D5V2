@@ -81,20 +81,10 @@ Extends the model with **continuous processes** and **instantaneous events** to 
 
 ## How to Run
 
-### Option 1: PDDL VS Code Extension (Recommended)
+- Option 1: PDDL VS Code Extension (for basic PDDL)
+- Option 2: Command Line with ENHSP (for PDDL+)
 
-1. Install the **PDDL** extension by **Jan Dolejší** from the VS Code Marketplace.
-2. Open a domain file and its corresponding problem file side by side.
-3. Right-click the problem file and select **"PDDL: Run the planner and visualize the plan"**.
-4. The extension will invoke a planner (e.g., ENHSP, lpg, or an online planner) and display the result.
-
-> For PDDL+ files, make sure to configure a planner that supports PDDL+ (e.g., **ENHSP**).
-
-### Option 2: Command Line with ENHSP (for PDDL+)
-
-[ENHSP](https://sites.google.com/view/enhsp/) supports PDDL+ with numeric fluents, processes, and events.
-
-```bash
+```
 java -jar enhsp.jar -o Irrigation_domain_plus.pddl -f Irrigation_problem_plus.pddl -h aibr
 ```
 
